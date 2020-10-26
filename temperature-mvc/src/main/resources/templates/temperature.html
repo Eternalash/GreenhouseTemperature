@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>temperature</title>
+</head>
+<body>
+<table>
+    <div>
+        <tr>
+            <td>大棚编号</td>
+            <td>1#温度</td>
+            <td>2#温度</td>
+            <td>3#温度</td>
+            <td>3#湿度</td>
+        </tr>
+    </div>
+    <div>
+    <tr th:each="temperatureInfo:${temperatureInfos}">
+        <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>
+        <td th:text="${temperatureInfo.getTemperature1()}">°</td>
+        <td th:text="${temperatureInfo.getTemperature2()}">°</td>
+        <td th:text="${temperatureInfo.getTemperature3()}">°</td>
+        <td th:text="${temperatureInfo.getHumidity()}">%</td>
+        </tr>
+    </div>
+<!--        <td th:switch="${temperature.getSensorNo()}" th:text="${temperature.getSensorNo()}">-->
+<!--            <span th:case="1">男</span>-->
+<!--            <span th:case="2">女</span>-->
+<!--            &lt;!&ndash;其他情况&ndash;&gt;-->
+<!--            <span th:case="*">未知</span>-->
+<!--        </td>-->
+</table>
+</body>
+</html>

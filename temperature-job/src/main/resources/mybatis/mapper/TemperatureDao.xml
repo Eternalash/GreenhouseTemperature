@@ -13,7 +13,7 @@
     id, greenhouseNo, sensorNo, temperature, humidity, `date`
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from temperature
     where id = #{id,jdbcType=INTEGER}
@@ -23,9 +23,9 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" keyProperty="id" parameterType="per.bryan.temperature.pojo.Temperature" useGeneratedKeys="true">
-    insert into temperature (greenhouseNo, sensorNo, temperature, 
+    insert into temperature (greenhouseNo, sensorNo, temperature,
       humidity, `date`)
-    values (#{greenhouseNo,jdbcType=VARCHAR}, #{sensorNo,jdbcType=VARCHAR}, #{temperature,jdbcType=VARCHAR}, 
+    values (#{greenhouseNo,jdbcType=VARCHAR}, #{sensorNo,jdbcType=VARCHAR}, #{temperature,jdbcType=VARCHAR},
       #{humidity,jdbcType=VARCHAR}, #{date,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="per.bryan.temperature.pojo.Temperature" useGeneratedKeys="true">
@@ -103,5 +103,6 @@
     greenhouseNo = #{greenhouseNo,jdbcType=VARCHAR}
     AND sensorNo = #{sensorNo,jdbcType=VARCHAR}
     order by id desc
+    limit 1
   </select>
 </mapper>

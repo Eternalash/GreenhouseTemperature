@@ -41,8 +41,8 @@ public class NettyServerHandler  extends ChannelInboundHandlerAdapter {
         temperature.setTemperature("25");
         temperature.setHumidity("50");
         temperature.setDate(LocalDateTime.now());
-        int id= temperatureMapper.insert(temperature);
-        System.out.println(new Gson().toJson(temperatureMapper.selectByPrimaryKey(id)));
+        temperatureMapper.insert(temperature);
+        System.out.println(new Gson().toJson(temperatureMapper.selectByPrimaryKey(temperature.getId())));
         System.out.println("客户端发送的数据是:" +buf.toString(StandardCharsets.UTF_8));
         ctx.close();
     }

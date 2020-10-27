@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{fragments/layout}">
 <head>
     <meta charset="UTF-8">
     <title>temperature</title>
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.2.1/jquery.min.js/}"></script>
 </head>
 <body>
-<table>
+<table id="table_refresh" th:fragment="table_refresh">
     <div>
         <tr>
             <td>大棚编号</td>
@@ -16,20 +19,22 @@
         </tr>
     </div>
     <div>
-    <tr th:each="temperatureInfo:${temperatureInfos}">
-        <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>
-        <td th:text="${temperatureInfo.getTemperature1()}">°</td>
-        <td th:text="${temperatureInfo.getTemperature2()}">°</td>
-        <td th:text="${temperatureInfo.getTemperature3()}">°</td>
-        <td th:text="${temperatureInfo.getHumidity()}">%</td>
+        <tr th:each="temperatureInfo:${temperatureInfos}">
+            <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>
+            <td th:text="|${temperatureInfo.getTemperature1()}°|"></td>
+            <td th:text="|${temperatureInfo.getTemperature2()}°|"></td>
+            <td th:text="|${temperatureInfo.getTemperature3()}°|"></td>
+            <td th:text="|${temperatureInfo.getHumidity()}%|"></td>
         </tr>
     </div>
-<!--        <td th:switch="${temperature.getSensorNo()}" th:text="${temperature.getSensorNo()}">-->
-<!--            <span th:case="1">男</span>-->
-<!--            <span th:case="2">女</span>-->
-<!--            &lt;!&ndash;其他情况&ndash;&gt;-->
-<!--            <span th:case="*">未知</span>-->
-<!--        </td>-->
 </table>
 </body>
+<script>
+    setInterval("localRefresh();", 3000);
+
+    function localRefresh() {
+        // 装载局部刷新返回的页面
+        $('#table_refresh').load("/temperatures/refresh");
+    }
+</script>
 </html>

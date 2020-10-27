@@ -7,9 +7,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.common.collect.Lists;
+
 import per.bryan.temperature.mapper.TemperatureDao;
+import per.bryan.temperature.mapper.TemperatureExample;
 import per.bryan.temperature.pojo.Temperature;
 import per.bryan.temperature.pojo.TemperatureInfo;
 
@@ -18,14 +22,45 @@ import per.bryan.temperature.pojo.TemperatureInfo;
  * @Date:2020/10/26
  */
 @Controller
-@RequestMapping("/temperature")
+@RequestMapping("/")
 public class TemperatureController {
     @Autowired
     private TemperatureDao temperatureMapper;
 
     @RequestMapping(value = "/temperatures")
     public String temperatures(Model model) {
-        List<TemperatureInfo> temperatureInfos=temperatureMapper.selectOneByDate("2020-10-26 17:33:55").stream()
+        TemperatureExample example = new TemperatureExample();
+        example.setOrderByClause("date");
+        example.setOrderByClause("greenhouseNo");
+        List<String> greenHouses = Lists.newArrayList("01", "02", "03");
+        TemperatureExample.Criteria criteria = example.createCriteria();
+        criteria.andGreenhouseNoIn(greenHouses);
+        example.setLimit(greenHouses.size() * 3);
+        List<TemperatureInfo> temperatureInfos = temperatureMapper.selectByExample(example).stream()
+            .sorted(Comparator.comparing(Temperature::getSensorNo))
+            .collect(Collectors.groupingBy(Temperature::getGreenhouseNo)).entrySet().stream().map(stringListEntry -> {
+                TemperatureInfo temperatureInfo = new TemperatureInfo();
+                temperatureInfo.setGreenhouseNo(stringListEntry.getKey());
+                temperatureInfo.setTemperature1(stringListEntry.getValue().get(0).getTemperature());
+                temperatureInfo.setTemperature2(stringListEntry.getValue().get(1).getTemperature());
+                temperatureInfo.setTemperature3(stringListEntry.getValue().get(2).getTemperature());
+                temperatureInfo.setHumidity(stringListEntry.getValue().get(2).getHumidity());
+                return temperatureInfo;
+            }).collect(Collectors.toList());
+        model.addAttribute("temperatureInfos", temperatureInfos);
+        return "temperature";
+    }
+
+    @RequestMapping(value = "/temperatures/refresh")
+    public String refresh(Model model) {
+        TemperatureExample example = new TemperatureExample();
+        example.setOrderByClause("date");
+        example.setOrderByClause("greenhouseNo");
+        List<String> greenHouses = Lists.newArrayList("01", "02", "03");
+        TemperatureExample.Criteria criteria = example.createCriteria();
+        criteria.andGreenhouseNoIn(greenHouses);
+        example.setLimit(greenHouses.size() * 3);
+        List<TemperatureInfo> temperatureInfos = temperatureMapper.selectByExample(example).stream()
                 .sorted(Comparator.comparing(Temperature::getSensorNo))
                 .collect(Collectors.groupingBy(Temperature::getGreenhouseNo)).entrySet().stream().map(stringListEntry -> {
                     TemperatureInfo temperatureInfo = new TemperatureInfo();
@@ -36,7 +71,12 @@ public class TemperatureController {
                     temperatureInfo.setHumidity(stringListEntry.getValue().get(2).getHumidity());
                     return temperatureInfo;
                 }).collect(Collectors.toList());
-        model.addAttribute("temperatureInfos",temperatureInfos);
-        return "temperature";
+        model.addAttribute("temperatureInfos", temperatureInfos);
+        return "temperature::table_refresh";
+    }
+
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "/error/access-denied";
     }
 }

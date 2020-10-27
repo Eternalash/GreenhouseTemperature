@@ -4,13 +4,12 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.ImportResource;
 
 /**
  * @Author:bryan.c
  * @Date:2020/10/26
  */
-@SpringBootApplication() //scanBasePackages = {"per.bryan.temperature.repository"}
+@SpringBootApplication //scanBasePackages = {"per.bryan.temperature.repository"}
 @MapperScan("per.bryan.temperature.mapper")
 //@ImportResource({
 //        "classpath:/mybatis/mapper/TemperatureDao.xml"

@@ -3,7 +3,6 @@ package per.bryan.temperature.pojo;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -24,10 +23,8 @@ public class Temperature implements Serializable {
     @GeneratedValue(generator = "JDBC")
     private Integer id;
 
-    @NotEmpty
     private String greenhouseNo;
 
-    @NotEmpty
     private String sensorNo;
 
     private String temperature;

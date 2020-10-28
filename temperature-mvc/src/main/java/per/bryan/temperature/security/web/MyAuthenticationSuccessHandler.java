@@ -16,7 +16,7 @@ import java.io.IOException;
  * @Author:bryan.c
  * @Date:2020/10/27
  */
-@Component
+//@Component
 public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {

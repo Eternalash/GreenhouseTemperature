@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import per.bryan.temperature.security.web.MyAuthenticationSuccessHandler;
 
 @EnableWebSecurity
 @Configuration
@@ -22,8 +21,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/", "/temperatures").permitAll().anyRequest().authenticated().and()
-            .formLogin().loginPage("/login").defaultSuccessUrl("/temperatures").permitAll().and().logout().permitAll();
+         http.authorizeRequests().antMatchers("/", "/js/**", "/css/**", "/img/**", "/webjars/**").permitAll()
+         .antMatchers("/user/**").hasRole("USER").anyRequest().authenticated().and().formLogin().loginPage("/login")
+         .successHandler(myAuthenticationSuccessHandler).permitAll().and().logout().invalidateHttpSession(true)
+         .clearAuthentication(true).logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+         .logoutSuccessUrl("/login?logout").permitAll().and().exceptionHandling();
     }
 
     @Bean

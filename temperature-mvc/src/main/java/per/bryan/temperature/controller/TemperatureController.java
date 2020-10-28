@@ -32,7 +32,7 @@ public class TemperatureController {
     @Autowired
     private TemperatureDao temperatureMapper;
 
-    @RequestMapping(value = "/temperatures,/index")
+    @RequestMapping(value = "/temperatures")
     public String temperatures(Model model) {
         TemperatureExample example = new TemperatureExample();
         example.setOrderByClause("date");

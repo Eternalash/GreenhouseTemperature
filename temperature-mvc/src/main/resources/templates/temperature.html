@@ -10,11 +10,11 @@
 <body>
 <table id="table_refresh" th:fragment="table_refresh">
     <tr>
-        <th>大棚编号</th>
-        <th>1#温度</th>
-        <th>2#温度</th>
-        <th>3#温度</th>
-        <th>3#湿度</th>
+        <th>大棚编号<img th:src="@{/img/greenhouse.png}" height="20px" width="20px"/></th>
+        <th>温度计1</th>
+        <th>温度计2</th>
+        <th>温度计3</th>
+        <th>湿度计</th>
     </tr>
     <tr th:each="temperatureInfo:${temperatureInfos}">
         <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>

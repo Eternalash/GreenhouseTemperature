@@ -9,24 +9,20 @@
 </head>
 <body>
 <table id="table_refresh" th:fragment="table_refresh">
-    <div>
-        <tr>
-            <td>大棚编号</td>
-            <td>1#温度</td>
-            <td>2#温度</td>
-            <td>3#温度</td>
-            <td>3#湿度</td>
-        </tr>
-    </div>
-    <div>
-        <tr th:each="temperatureInfo:${temperatureInfos}">
-            <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>
-            <td th:text="|${temperatureInfo.getTemperature1()}°|"></td>
-            <td th:text="|${temperatureInfo.getTemperature2()}°|"></td>
-            <td th:text="|${temperatureInfo.getTemperature3()}°|"></td>
-            <td th:text="|${temperatureInfo.getHumidity()}%|"></td>
-        </tr>
-    </div>
+    <tr>
+        <th>大棚编号</th>
+        <th>1#温度</th>
+        <th>2#温度</th>
+        <th>3#温度</th>
+        <th>3#湿度</th>
+    </tr>
+    <tr th:each="temperatureInfo:${temperatureInfos}">
+        <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>
+        <th th:text="|${temperatureInfo.getTemperature1()}°|"></th>
+        <th th:text="|${temperatureInfo.getTemperature2()}°|"></th>
+        <th th:text="|${temperatureInfo.getTemperature3()}°|"></th>
+        <th th:text="|${temperatureInfo.getHumidity()}%|"></th>
+    </tr>
 </table>
 </body>
 <script>

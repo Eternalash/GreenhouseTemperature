@@ -1,18 +1,23 @@
 package per.bryan.temperature.netty;
 
-import com.google.gson.Gson;
-import io.netty.buffer.ByteBuf;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import per.bryan.temperature.mapper.TemperatureDao;
 import per.bryan.temperature.pojo.Temperature;
 
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import static per.bryan.temperature.common.ByteUtil.getUnsignedByte;
 
 /**
  * @Author:bryan.c
@@ -20,10 +25,12 @@ import java.time.LocalDateTime;
  */
 @Component
 @ChannelHandler.Sharable
+@Slf4j
 @SuppressWarnings("all")
 public class NettyServerHandler  extends ChannelInboundHandlerAdapter {
     @Autowired
     private TemperatureDao temperatureMapper;
+    ObjectMapper mapper = new ObjectMapper();
 
     /**
      * 读取客户端发送来的数据
@@ -33,18 +40,43 @@ public class NettyServerHandler  extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("客户端请求到了..." + ctx.channel().remoteAddress());
-        ByteBuf buf = (ByteBuf) msg;
-        Temperature temperature=new Temperature();
-        temperature.setGreenhouseNo("01");
-        temperature.setSensorNo("#1");
-        temperature.setTemperature("25");
-        temperature.setHumidity("50");
-        temperature.setDate(LocalDateTime.now());
-        temperatureMapper.insert(temperature);
-        System.out.println(new Gson().toJson(temperatureMapper.selectByPrimaryKey(temperature.getId())));
-        System.out.println("客户端发送的数据是:" +buf.toString(StandardCharsets.UTF_8));
-        ctx.close();
+        byte[] bytes= (byte[]) msg;
+        try {
+            int insert=insertTemperatures(bytes);
+            log.info("NettyServerHandler insertTemperatures insert = {}, channel buf = {}", insert, mapper.writeValueAsString(bytes));
+        }catch (Exception e){
+            log.error("NettyServerHandler insertTemperatures exception, channel buf = {}",mapper.writeValueAsString(bytes));
+        }
+        finally {
+            ctx.close();
+        }
+    }
+
+    @Transactional(transactionManager = "temperatureTransactionManager", rollbackFor = Exception.class)
+    private int insertTemperatures(byte[] bytes) throws Exception {
+        if(ObjectUtils.isEmpty(bytes))
+            return -1;
+        int result=0;
+        for(int i=0;i<30;i++){
+            int value=getUnsignedByte(bytes[i]);
+            Temperature temperature=new Temperature();
+            switch (i%3){
+                case 0:
+                    temperature.setSensorNo("1");
+                case 1:
+                    temperature.setSensorNo("2");
+                case 2:
+                    temperature.setSensorNo("3");
+                default:
+                    temperature.setGreenhouseNo(String.valueOf(i/3));
+                    temperature.setTemperature(String.valueOf(value));
+                    temperature.setHumidity(String.valueOf(getUnsignedByte(bytes[i/3+30])));
+                    temperature.setDate(LocalDateTime.now());
+                    temperatureMapper.insert(temperature);
+            }
+            result++;
+        }
+        return result;
     }
 
     /**

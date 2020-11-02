@@ -9,15 +9,8 @@
 </head>
 <body>
 <table id="table_refresh" th:fragment="table_refresh">
-    <tr>
-        <th>大棚编号<img th:src="@{/img/greenhouse.png}" height="20px" width="20px"/></th>
-        <th>温度计1</th>
-        <th>温度计2</th>
-        <th>温度计3</th>
-        <th>湿度计</th>
-    </tr>
     <tr th:each="temperatureInfo:${temperatureInfos}">
-        <td th:text="${temperatureInfo.getGreenhouseNo()}"></td>
+        <td th:text="${temperatureInfo.getGreenhouseNo()}" th:src="@{/img/greenhouse.png}" height="20px" width="20px" rowspan="left"></td>
         <th th:text="|${temperatureInfo.getTemperature1()}°|"></th>
         <th th:text="|${temperatureInfo.getTemperature2()}°|"></th>
         <th th:text="|${temperatureInfo.getTemperature3()}°|"></th>

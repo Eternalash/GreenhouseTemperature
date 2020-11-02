@@ -16,14 +16,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @SuppressWarnings("all")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
          http.authorizeRequests().antMatchers("/", "/js/**", "/css/**", "/img/**", "/webjars/**").permitAll()
          .antMatchers("/user/**").hasRole("USER").anyRequest().authenticated().and().formLogin().loginPage("/login")
-         .successHandler(myAuthenticationSuccessHandler).permitAll().and().logout().invalidateHttpSession(true)
+         .permitAll().and().logout().invalidateHttpSession(true)
          .clearAuthentication(true).logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
          .logoutSuccessUrl("/login?logout").permitAll().and().exceptionHandling();
     }

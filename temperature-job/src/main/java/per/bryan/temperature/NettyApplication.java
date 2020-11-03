@@ -11,7 +11,6 @@ import org.springframework.context.annotation.PropertySource;
  */
 @SpringBootApplication
 @MapperScan("per.bryan.temperature.mapper")
-@PropertySource(value={"mybatis/mapper/"})
 public class NettyApplication{
     public static void main(String[] args) {
         SpringApplication.run(NettyApplication.class, args);

@@ -83,7 +83,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             temperature.setHumidity(String.valueOf(getUnsignedByte(bytes[i / 3 + 30])));
             temperature.setDate(localDateTime);
             temperatureMapper.insert(temperature);
-            transportRepository.postElasticsearch(mapper.writeValueAsString(temperature));
+            transportRepository.postElasticsearch(temperature);
             result++;
         }
         return result;

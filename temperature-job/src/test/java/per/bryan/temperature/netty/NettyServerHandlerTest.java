@@ -1,26 +1,21 @@
 package per.bryan.temperature.netty;
 
-import static ch.qos.logback.core.encoder.ByteArrayUtil.hexStringToByteArray;
-import static ch.qos.logback.core.encoder.ByteArrayUtil.toHexString;
+import java.net.SocketAddress;
+
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import per.bryan.temperature.CommandLineApp;
 import per.bryan.temperature.NettyApplication;
-
-import java.net.SocketAddress;
 
 /**
  * @Author:bryan.c

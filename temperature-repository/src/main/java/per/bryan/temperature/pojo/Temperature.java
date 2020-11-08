@@ -1,5 +1,7 @@
 package per.bryan.temperature.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,13 +10,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 /**
  * temperature
+ * 
  * @author bryan.c
  */
-@Table(name="temperature")
+@Table(name = "temperature")
 @Data
 @Setter
 @Getter
@@ -46,12 +50,16 @@ public class Temperature implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        Temperature other = (Temperature) that;
+        Temperature other = (Temperature)that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getGreenhouseNo() == null ? other.getGreenhouseNo() == null : this.getGreenhouseNo().equals(other.getGreenhouseNo()))
-            && (this.getSensorNo() == null ? other.getSensorNo() == null : this.getSensorNo().equals(other.getSensorNo()))
-            && (this.getTemperature() == null ? other.getTemperature() == null : this.getTemperature().equals(other.getTemperature()))
-            && (this.getHumidity() == null ? other.getHumidity() == null : this.getHumidity().equals(other.getHumidity()))
+            && (this.getGreenhouseNo() == null ? other.getGreenhouseNo() == null
+                : this.getGreenhouseNo().equals(other.getGreenhouseNo()))
+            && (this.getSensorNo() == null ? other.getSensorNo() == null
+                : this.getSensorNo().equals(other.getSensorNo()))
+            && (this.getTemperature() == null ? other.getTemperature() == null
+                : this.getTemperature().equals(other.getTemperature()))
+            && (this.getHumidity() == null ? other.getHumidity() == null
+                : this.getHumidity().equals(other.getHumidity()))
             && (this.getDate() == null ? other.getDate() == null : this.getDate().equals(other.getDate()));
     }
 

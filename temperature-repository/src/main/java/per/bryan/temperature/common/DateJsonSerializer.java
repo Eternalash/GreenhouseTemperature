@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  */
 public class DateJsonSerializer extends JsonSerializer<LocalDateTime> {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     @Override
     public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator,

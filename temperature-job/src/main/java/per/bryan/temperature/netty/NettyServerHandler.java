@@ -2,8 +2,10 @@ package per.bryan.temperature.netty;
 
 import static per.bryan.temperature.common.ByteUtil.getUnsignedByte;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,29 +60,31 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    @Transactional(transactionManager = "temperatureTransactionManager", rollbackFor = Exception.class)
-    private int insertTemperatures(byte[] bytes) throws Exception {
+    @Transactional(transactionManager = "temperatureTransactionManager", rollbackFor = IOException.class)
+    private int insertTemperatures(byte[] bytes) throws IOException {
         if (ObjectUtils.isEmpty(bytes))
             return -1;
         int result = 0;
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of("+08:00"));
         for (int i = 0; i < 30; i++) {
             int value = getUnsignedByte(bytes[i]);
             Temperature temperature = new Temperature();
             switch (i % 3) {
                 case 0:
                     temperature.setSensorNo("1");
+                    temperature.setHumidity("0");
                     break;
                 case 1:
                     temperature.setSensorNo("2");
+                    temperature.setHumidity("0");
                     break;
                 case 2:
                     temperature.setSensorNo("3");
+                    temperature.setHumidity(String.valueOf(getUnsignedByte(bytes[i / 3 + 30])));
                     break;
             }
             temperature.setGreenhouseNo(String.valueOf(i / 3));
             temperature.setTemperature(String.valueOf(value));
-            temperature.setHumidity(String.valueOf(getUnsignedByte(bytes[i / 3 + 30])));
             temperature.setDate(localDateTime);
             temperatureMapper.insert(temperature);
             transportRepository.postElasticsearch(temperature);

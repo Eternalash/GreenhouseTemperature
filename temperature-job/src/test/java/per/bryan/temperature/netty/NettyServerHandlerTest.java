@@ -32,7 +32,7 @@ class NettyServerHandlerTest {
 
     @Test
     void channelRead() throws Exception {
-        ChannelHandlerContext channelHandlerContext=new ChannelHandlerContext() {
+        ChannelHandlerContext channelHandlerContext = new ChannelHandlerContext() {
             @Override
             public Channel channel() {
                 return null;
@@ -174,7 +174,8 @@ class NettyServerHandlerTest {
             }
 
             @Override
-            public ChannelFuture connect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
+            public ChannelFuture connect(SocketAddress remoteAddress, SocketAddress localAddress,
+                ChannelPromise promise) {
                 return null;
             }
 
@@ -238,17 +239,25 @@ class NettyServerHandlerTest {
                 return null;
             }
         };
-        Random rd=new Random();
-        byte[] msg=new byte[] {(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70),
-                (byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(30),(byte)rd.nextInt(70)};
-        nettyServerHandler.channelRead(channelHandlerContext,msg);
+        Random rd = new Random();
+        byte[] msg;
+        for (int i = 0; i < 100; i++) {
+            msg = new byte[] {(byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20), (byte)(rd.nextInt(5) + 20),
+                (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25),
+                (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25),
+                (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25),
+                (byte)(rd.nextInt(40) + 25)};
+            nettyServerHandler.channelRead(channelHandlerContext, msg);
+            Thread.sleep(30000);
+        }
     }
 }

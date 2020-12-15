@@ -8,7 +8,9 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import per.bryan.temperature.netty.NettyServerHandler;
@@ -18,9 +20,12 @@ import per.bryan.temperature.netty.NettyServerHandler;
  * @Date:2020/10/20
  */
 @Component
+@Slf4j
 public class CommandLineApp implements CommandLineRunner {
     @Autowired
     private NettyServerHandler nettyServerHandler;
+    @Value("${listen.port}")
+    private int PORT;
 
     @Override
     public void run(String[] args) {
@@ -48,13 +53,13 @@ public class CommandLineApp implements CommandLineRunner {
                             socketChannel.pipeline().addLast(nettyServerHandler);
                         }
                     });
-            System.out.println("服务启动了....");
+            log.info("服务启动了....");
             // 绑定端口  启动服务
-            ChannelFuture channelFuture = bootstrap.bind(9898).sync();
+            ChannelFuture channelFuture = bootstrap.bind(PORT).sync();
             // 对关闭通道进行监听
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
-
+            log.error("exception",e);
         } finally {
             // 优雅停服
             boosGroup.shutdownGracefully();

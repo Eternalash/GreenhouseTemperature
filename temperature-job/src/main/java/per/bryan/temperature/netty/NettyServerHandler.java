@@ -1,27 +1,26 @@
 package per.bryan.temperature.netty;
 
-import static per.bryan.temperature.common.ByteUtil.getUnsignedByte;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import per.bryan.temperature.mapper.TemperatureDao;
+import per.bryan.temperature.pojo.Temperature;
+import per.bryan.temperature.repository.TransportRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import lombok.extern.slf4j.Slf4j;
-import per.bryan.temperature.mapper.TemperatureDao;
-import per.bryan.temperature.pojo.Temperature;
-import per.bryan.temperature.repository.TransportRepository;
+import static per.bryan.temperature.common.ByteUtil.getUnsignedByte;
 
 /**
  * @Author:bryan.c
@@ -47,7 +46,11 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        byte[] bytes = (byte[])msg;
+        ByteBuf buf = (ByteBuf) msg;
+        byte[] bytes = new byte[buf.readableBytes()];
+        buf.readBytes(bytes);
+        log.info("NettyServerHandler insertTemperatures,source channel buf = {}",
+                new String(bytes, "UTF-8"));
         try {
             int insert = insertTemperatures(bytes);
             log.info("NettyServerHandler insertTemperatures insert = {}, channel buf = {}", insert,
@@ -56,6 +59,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             log.error("NettyServerHandler insertTemperatures exception, channel buf = {}",
                 mapper.writeValueAsString(bytes));
         } finally {
+            buf.release();
             ctx.close();
         }
     }

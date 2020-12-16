@@ -10,8 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.*;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
@@ -256,7 +261,11 @@ class NettyServerHandlerTest {
                 (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25),
                 (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25), (byte)(rd.nextInt(40) + 25),
                 (byte)(rd.nextInt(40) + 25)};
-            nettyServerHandler.channelRead(channelHandlerContext, msg);
+            ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
+            buffer.writeBytes(msg);
+            FullHttpRequest httpRequest =
+                new DefaultFullHttpRequest(new HttpVersion("HTTP/1.1", true), HttpMethod.POST, "http://localhost:9898/", buffer);
+            nettyServerHandler.channelRead(channelHandlerContext, httpRequest);
             Thread.sleep(30000);
         }
     }

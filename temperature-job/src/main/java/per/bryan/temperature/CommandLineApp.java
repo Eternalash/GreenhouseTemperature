@@ -1,5 +1,10 @@
 package per.bryan.temperature;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -8,11 +13,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 import per.bryan.temperature.netty.NettyServerHandler;
 
 /**
@@ -39,27 +43,30 @@ public class CommandLineApp implements CommandLineRunner {
         try {
             // 设置相关的配置信息
             bootstrap.group(boosGroup, workGroup) // 设置对应的线程组
-                    .channel(NioServerSocketChannel.class) // 设置对应的通道
-                    .option(ChannelOption.SO_BACKLOG, 1024) // 设置线程的连接个数
-                    .childHandler(new ChannelInitializer<SocketChannel>() { // 设置
-                        /**
-                         * 给pipeline 设置处理器
-                         *
-                         * @param socketChannel
-                         * @throws Exception
-                         */
-                        @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(nettyServerHandler);
-                        }
-                    });
+                .channel(NioServerSocketChannel.class) // 设置对应的通道
+                .option(ChannelOption.SO_BACKLOG, 1024) // 设置线程的连接个数
+                .childHandler(new ChannelInitializer<SocketChannel>() { // 设置
+                    /**
+                     * 给pipeline 设置处理器
+                     *
+                     * @param socketChannel
+                     * @throws Exception
+                     */
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        socketChannel.pipeline().addLast("encoder", new HttpResponseEncoder())
+                            .addLast("decoder", new HttpRequestDecoder())
+                            .addLast("aggregator", new HttpObjectAggregator(10 * 1024 * 1024))
+                            .addLast(nettyServerHandler);
+                    }
+                });
             log.info("服务启动了....");
-            // 绑定端口  启动服务
+            // 绑定端口 启动服务
             ChannelFuture channelFuture = bootstrap.bind(PORT).sync();
             // 对关闭通道进行监听
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
-            log.error("exception",e);
+            log.error("exception", e);
         } finally {
             // 优雅停服
             boosGroup.shutdownGracefully();

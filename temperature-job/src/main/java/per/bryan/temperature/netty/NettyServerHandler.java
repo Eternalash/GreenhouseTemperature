@@ -50,6 +50,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        log.info("source msg type -->"+msg.getClass().getName());
         FullHttpRequest httpRequest = (FullHttpRequest)msg;
         ByteBuf buf = httpRequest.content();
         byte[] bytes = new byte[buf.readableBytes()];

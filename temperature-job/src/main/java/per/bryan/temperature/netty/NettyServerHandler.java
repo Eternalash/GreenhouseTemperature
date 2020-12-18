@@ -3,11 +3,11 @@ package per.bryan.temperature.netty;
 import static per.bryan.temperature.common.ByteUtil.getUnsignedByte;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -20,7 +20,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.*;
 import lombok.extern.slf4j.Slf4j;
 import per.bryan.temperature.mapper.TemperatureDao;
 import per.bryan.temperature.pojo.Temperature;
@@ -53,6 +53,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         log.info("source msg type -->"+msg.getClass().getName());
         FullHttpRequest httpRequest = (FullHttpRequest)msg;
         ByteBuf buf = httpRequest.content();
+        ByteBuf bufReq = Unpooled.buffer();
         byte[] bytes = new byte[buf.readableBytes()];
         buf.readBytes(bytes);
         log.info("NettyServerHandler insertTemperatures,source channel buf = ->{}<-", printMsg(bytes));
@@ -62,6 +63,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                 printMsg(bytes));
         } catch (Exception e) {
             log.error("NettyServerHandler insertTemperatures exception, channel buf = ->{}<-", printMsg(bytes));
+            bufReq.writeBytes("failed\n".getBytes());
+            HttpResponse httpResponse=new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.EXPECTATION_FAILED,bufReq);
+            ctx.writeAndFlush(httpResponse);
         } finally {
             buf.release();
             ctx.close();
@@ -113,7 +117,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        // writeAndFlush 是组合方法
-        ctx.writeAndFlush(Unpooled.copiedBuffer("你好啊，客户端....^_^", StandardCharsets.UTF_8));
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeBytes("success".getBytes());
+        HttpResponse httpResponse=new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,buf);
+        ctx.writeAndFlush(httpResponse);
     }
 }

@@ -1,5 +1,7 @@
 package per.bryan.temperature;
 
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -54,8 +56,8 @@ public class CommandLineApp implements CommandLineRunner {
                      */
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast("encoder", new HttpResponseEncoder())
-                            .addLast("decoder", new HttpRequestDecoder())
+                        socketChannel.pipeline().addLast("stringEncoder", new StringEncoder())
+                            .addLast("stringDecoder", new StringDecoder())
                             .addLast("aggregator", new HttpObjectAggregator(10 * 1024 * 1024))
                             .addLast(nettyServerHandler);
                     }

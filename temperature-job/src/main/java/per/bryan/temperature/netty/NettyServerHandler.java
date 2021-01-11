@@ -3,11 +3,12 @@ package per.bryan.temperature.netty;
 import static per.bryan.temperature.common.ByteUtil.getUnsignedByte;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -20,7 +21,10 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import lombok.extern.slf4j.Slf4j;
 import per.bryan.temperature.mapper.TemperatureDao;
 import per.bryan.temperature.pojo.Temperature;
@@ -39,6 +43,8 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private TemperatureDao temperatureMapper;
     @Autowired
     private TransportRepository transportRepository;
+    @Value("${support.remote.address}")
+    private String address;
     ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -50,14 +56,15 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        log.info("source msg type -->"+msg.getClass().getName());
-        FullHttpRequest httpRequest = (FullHttpRequest)msg;
-        ByteBuf buf = httpRequest.content();
+        InetSocketAddress ipSocket = (InetSocketAddress)ctx.channel().remoteAddress();
+        String clientIp = ipSocket.getAddress().getHostAddress();
+        log.info("source msg type -->"+msg.getClass().getName()+"-->\n"+msg+"-->IP:"+clientIp);
         ByteBuf bufReq = Unpooled.buffer();
-        byte[] bytes = new byte[buf.readableBytes()];
-        buf.readBytes(bytes);
-        log.info("NettyServerHandler insertTemperatures,source channel buf = ->{}<-", printMsg(bytes));
+        byte[] bytes = String.valueOf(msg).getBytes();
         try {
+            if(!clientIp.equalsIgnoreCase(address)){
+                throw new Exception("unsupport remote address");
+            }
             int insert = insertTemperatures(bytes);
             log.info("NettyServerHandler insertTemperatures insert = {}, channel buf = ->{}<-", insert,
                 printMsg(bytes));
@@ -67,7 +74,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             HttpResponse httpResponse=new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.EXPECTATION_FAILED,bufReq);
             ctx.writeAndFlush(httpResponse);
         } finally {
-            buf.release();
+            bufReq.release();
             ctx.close();
         }
     }

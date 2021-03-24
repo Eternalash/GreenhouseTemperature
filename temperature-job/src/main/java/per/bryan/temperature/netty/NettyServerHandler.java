@@ -62,9 +62,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         ByteBuf bufReq = Unpooled.buffer();
         byte[] bytes = String.valueOf(msg).getBytes();
         try {
-            if(!clientIp.equalsIgnoreCase(address)){
-                throw new Exception("unsupport remote address");
-            }
+//            if(!clientIp.equalsIgnoreCase(address)){
+//                throw new Exception("unsupport remote address");
+//            }
             int insert = insertTemperatures(bytes);
             log.info("NettyServerHandler insertTemperatures insert = {}, channel buf = ->{}<-", insert,
                 printMsg(bytes));

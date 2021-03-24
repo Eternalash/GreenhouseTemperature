@@ -10,14 +10,22 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import lombok.SneakyThrows;
@@ -33,20 +41,31 @@ import per.bryan.temperature.pojo.Temperature;
 public class TransportRepository {
     private static  RestHighLevelClient restClient;
     private static final String INDEX="temperatures";
-    static {
+    @Value("${elk.username}")
+    private String userName;
+    @Value("${elk.password}")
+    private String passWord;
+
+    @PostConstruct
+    public void init() throws IOException {
         try {
             // on startup
+            Credentials credentials=new UsernamePasswordCredentials(userName,passWord);
+            final CredentialsProvider credentialsProvider=new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,credentials);
             restClient = new RestHighLevelClient(
                     RestClient.builder(
-                            new HttpHost("localhost", 9200, "http")));
+                            new HttpHost("localhost", 9200, "http"))
+            .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+                @Override
+                public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
+                    return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                }
+            }));
         }catch ( Exception e){
             log.error("init failed",e);
             throw e;
         }
-    }
-
-    @PostConstruct
-    public void init() throws IOException {
         GetIndexRequest getIndexRequest = new GetIndexRequest(INDEX);
         if(!restClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT)) {
             createIndex();

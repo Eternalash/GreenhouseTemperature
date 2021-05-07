@@ -55,7 +55,8 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
      * @throws Exception
      */
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    @Transactional(transactionManager = "temperatureTransactionManager", rollbackFor = IOException.class)
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
         InetSocketAddress ipSocket = (InetSocketAddress)ctx.channel().remoteAddress();
         String clientIp = ipSocket.getAddress().getHostAddress();
         log.info("source msg type -->"+msg.getClass().getName()+"-->\n"+msg+"-->IP:"+clientIp);
@@ -68,11 +69,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             int insert = insertTemperatures(bytes);
             log.info("NettyServerHandler insertTemperatures insert = {}, channel buf = ->{}<-", insert,
                 printMsg(bytes));
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("NettyServerHandler insertTemperatures exception, channel buf = ->{}<-", printMsg(bytes));
             bufReq.writeBytes("failed\n".getBytes());
             HttpResponse httpResponse=new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.EXPECTATION_FAILED,bufReq);
             ctx.writeAndFlush(httpResponse);
+            throw e;
         } finally {
             bufReq.release();
             ctx.close();
@@ -83,7 +85,6 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         return Bytes.asList(bytes).stream().map(by -> String.valueOf(by)).reduce((s1, s2) -> s1 + "," + s2).orElse("");
     }
 
-    @Transactional(transactionManager = "temperatureTransactionManager", rollbackFor = IOException.class)
     private int insertTemperatures(byte[] bytes) throws IOException {
         if (ObjectUtils.isEmpty(bytes))
             return -1;
